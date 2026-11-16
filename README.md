@@ -1,51 +1,59 @@
-# Lab 5: Static Code Analysis — Course Enrollment System
+# Lab 5 — Static Code Analysis: Course Enrollment System
 
-**Your file:** `course_enrollment_system.py`
+Static analysis of a university course enrollment program with **Pylint**, **Bandit** and **Flake8**, followed by fixing the findings.
 
-Follow the lab handout for the full instructions.
+| Tool | Before | After |
+|------|--------|-------|
+| Pylint | 4.00 / 10 | **10.00 / 10** |
+| Bandit | 6 issues (2 High, 1 Medium, 3 Low) | **0** |
+| Flake8 | 12 violations | **0** |
 
-## About the program
+> Source material: `SETAPESU26/L5_52_course_enrollment_system` (copied and modified here; nothing is pushed back to it).
 
-A university course catalog and enrollment manager. It registers students into classes, processes dropped courses, computes scholarship tuition rates, and exports enrollment rosters.
+## Repository layout
 
-The code works, but only just. It has quality, style and security problems of the kind Pylint, Flake8 and Bandit are built to find.
+```
+.
+├── course_enrollment_system.py   # cleaned & fixed program
+├── original/                     # untouched original for comparison
+├── reports/
+│   ├── before/                   # pylint / bandit / flake8 reports on the original
+│   └── after/                    # same reports on the fixed code
+├── screenshots/                  # terminal screenshots of every run
+├── issues.md                     # issue table (15 findings: tool, line, fix)
+└── reflection.md                 # reflection answers
+```
 
-## What to do
+## Run it
 
-1. **Run it first** and read the output carefully:
-   ```bash
-   python course_enrollment_system.py
-   ```
-   It asks one question. Press Enter to use the default, then try a few inputs of your own. Not every problem in this file is something a tool will flag, so pay attention to output that looks wrong.
+```bash
+python -m venv venv
+venv\Scripts\activate          # Linux/macOS: source venv/bin/activate
+pip install pylint bandit flake8
+python course_enrollment_system.py
+pylint course_enrollment_system.py
+bandit -r course_enrollment_system.py
+flake8 course_enrollment_system.py
+```
 
-2. **Install the tools:**
-   ```bash
-   pip install pylint bandit flake8
-   ```
+## Commits (one per tool)
 
-3. **Run the analysis** and save the reports:
-   ```bash
-   pylint course_enrollment_system.py > pylint_report.txt
-   bandit -r course_enrollment_system.py > bandit_report.txt
-   flake8 course_enrollment_system.py > flake8_report.txt
-   ```
+1. **Baseline** — original code, before-reports, screenshot
+2. **Pylint fixes** — naming, docstrings, mutable default, bare except, `with open`, unused code, drop-course logic bug
+3. **Bandit fixes** — no `eval`, SHA-256, `secrets`, no `os.system`, no hard-coded token
+4. **Flake8 fixes** — line length, final newline, `__main__` guard
 
-4. **Document the issues** in `issues.md` using this table (at least 4 rows, high and medium severity first):
+## Highlights
 
-   | Issue | Type | Line(s) | Description | Fix Approach |
-   |-------|------|---------|-------------|--------------|
-   | ... | ... | ... | ... | ... |
+* **Security:** `eval()` replaced by a whitelisting `ast` evaluator; MD5 → SHA-256; shell call removed; secret moved to an environment variable and no longer printed.
+* **Bug found by running, not by tools:** dropping a course nobody was enrolled in re-opened it (`Open courses: 3`). It is now refused (`Open courses: 2`) and tuition is refunded on real drops.
+* Details: [issues.md](issues.md) · [reflection.md](reflection.md)
 
-5. **Fix the code.** Fix at least 4 of the issues you documented, then rerun all three tools to confirm they are gone. Repeat until you are satisfied. The program should still do its job when you are done.
+## Screenshots
 
-6. **Reflect.** Answer the four reflection questions from the handout in `reflection.md`.
-
-## Deliverables
-
-1. `course_enrollment_system.py`: your cleaned version, with at least 4 issues fixed.
-2. `issues.md`: the completed issue table.
-3. `reflection.md`: your answers to the reflection questions.
-
-**Target:** aim for a Pylint score above 9.5 on your final file. A perfect 10.00/10 is very good.
-
-Be ready to explain the bugs you found and how you fixed them. You may be called on to present.
+| Before | After |
+|--------|-------|
+| ![](screenshots/02_before_pylint.png) | ![](screenshots/05_after_pylint.png) |
+| ![](screenshots/03_before_bandit.png) | ![](screenshots/06_after_bandit.png) |
+| ![](screenshots/04_before_flake8.png) | ![](screenshots/07_after_flake8.png) |
+| ![](screenshots/01_original_run.png) | ![](screenshots/08_fixed_run.png) |
